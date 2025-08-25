@@ -51,6 +51,7 @@ PizzaCoin is launching and wants to share pizza slices with their community usin
 [//]: # (contest-details-close)
 
 [//]: # (getting-started-open)
+
 ## Getting Started
 
 ## Requirements
@@ -105,6 +106,7 @@ aptos move test --coverage --named-addresses pizza_drop=0x123
 [//]: # (getting-started-close)
 
 [//]: # (scope-open)
+
 ## Scope
 - In Scope:
 ```
@@ -121,21 +123,11 @@ aptos move test --coverage --named-addresses pizza_drop=0x123
 
 [//]: # (scope-close)
 
-## Known Issues
 [//]: # (known-issues-open)
-<p align="center">
+
+## Known Issues
+
 No known issues reported.
-</p>
+
 [//]: # (known-issues-close)
-
-### This challenge teaches several important security concepts:
-
-- How Move handles access control and ownership verification
-- Resource account management and signer capabilities
-- APT (Aptos Coin) integration and transfer security
-- Randomness implementation using `#[randomness]` attribute
-- State management with global storage and tables
-- Economic logic verification (airdrop mechanics)
-- Balance tracking consistency (internal vs actual balances)
-- Prevention of double-spending and multiple claims
  
