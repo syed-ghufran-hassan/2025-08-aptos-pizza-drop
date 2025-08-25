@@ -1,18 +1,16 @@
 # First Flight #1: PizzaDrop
 
 ## Contest Details
-- 2x XP/Finding!
   
-- High - 200xp
-- Medium - 40xp
-- Low - 4xp
+- High - 100xp
+- Medium - 20xp
+- Low - 2xp
 
-Starts: TBD
-Ends: TBD
+Starts: August 28, 2025 Noon UTC
+Ends: September 04, 2025 Noon UTC
 
 ## Stats
 - nSLOC: ~125
-- Complexity Score: 35
 
 [//]: # (contest-details-open)
 
