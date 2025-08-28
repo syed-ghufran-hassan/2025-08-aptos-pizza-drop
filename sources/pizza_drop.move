@@ -8,34 +8,43 @@ module pizza_drop::airdrop {
     use aptos_framework::aptos_coin::AptosCoin; //Specific import for Aptos native token (APT). The base currency of the Aptos network
 
     #[test_only]
-    use std::debug;
+    use std::debug; //The debug module offers functions for printing debug information during transaction execution so it needs to be used in testnet and devnet only as it consumes lot of gas.
 
     /// Error codes
-    const E_NOT_OWNER: u64 = 1;
-    const E_NOT_REGISTERED: u64 = 2;
-    const E_ALREADY_CLAIMED: u64 = 3;
-    const E_INSUFFICIENT_FUND: u64 = 4;
+    const E_NOT_OWNER: u64 = 1;  // Caller doesn't have ownership rights
+    const E_NOT_REGISTERED: u64 = 2; // Account isn't registered in the system  
+    const E_ALREADY_CLAIMED: u64 = 3; // Reward/asset already claimed by user
+    const E_INSUFFICIENT_FUND: u64 = 4; // Not enough tokens/balance for operation
 
-    #[event]
-    struct PizzaClaimed has drop, store {
-        user: address,
-        amount: u64,
+    #[event] //The attribute that marks this struct as an on-chain event
+    struct PizzaClaimed has drop, store { //The name of the event (describes what happened) with the required abilities of events i.e. drop Allows the event to be discarded and store Allows the event to be stored in global storage
+        user: address, //who performed the action
+        amount: u64, //How much pizza was claimed
     }
 
     #[event]
-    struct PizzaLoverRegistered has drop, store {
-        user: address,
+    struct PizzaLoverRegistered has drop, store { // This event is emitted when a new user registers as a pizza lover in your system.
+        user: address, // user address
     }
 
-    struct ModuleData has key {
-        signer_cap: account::SignerCapability,
+//This struct is typically stored under the module's account (usually the account that deployed the contract) and provides the module with special privileges: 
+
+ Module Administration: Allows the module to perform privileged operations
+
+Resource Management: Create resources on behalf of the module account
+
+Fee Collection: Withdraw funds from the module account
+
+Upgrade Capability: Manage module upgrades
+    struct ModuleData has key { //This means the struct is a resource that can be stored under an account in global storage.
+        signer_cap: account::SignerCapability, //A SignerCapability is a powerful object that allows generating a signer for the account it controls. It's like having a "master key" to an account
     }
 
-    struct State has key {
-        users_claimed_amount: Table<address, u64>,
-        claimed_users: Table<address, bool>,
-        owner: address,
-        balance: u64,
+    struct State has key { //this struct is stored as a resource in global storage under a specific account.
+        users_claimed_amount: Table<address, u64>, //User address → Amount they claimed. Tracks how much each user has claimed. 0x123 → 500 (user at 0x123 claimed 500 units)
+        claimed_users: Table<address, bool>, //User address → Whether they've claimed (true/false). Quick lookup to check if a user has claimed anything. 
+        owner: address, //Admin/owner address with special privileges
+        balance: u64, //Tracks the total balance/tokens in the contract
     }
 
     /// Initialize the module
