@@ -1,11 +1,11 @@
 module pizza_drop::airdrop {
-    use std::signer;
-    use aptos_framework::account;
-    use aptos_std::table::{Self, Table};
-    use aptos_framework::event;
-    use aptos_framework::timestamp;
-    use aptos_framework::coin::{Self, Coin};
-    use aptos_framework::aptos_coin::AptosCoin;
+    use std::signer; //Provides access to the signer object representing the transaction sender Used for authentication and authorization
+    use aptos_framework::account; //Account management utilities. Functions for creating accounts, checking account existence, etc.
+    use aptos_std::table::{Self, Table}; //Table data structure for storing key-value pairs. Useful for mapping data (like user balances, NFT collections, etc.)
+    use aptos_framework::event; //Event system for emitting on-chain events. Used for logging and off-chain indexing
+    use aptos_framework::timestamp; //Access to blockchain timestamp functionality. Useful for time-based logic
+    use aptos_framework::coin::{Self, Coin}; //Core coin/token functionality. Functions for minting, burning, transferring coins
+    use aptos_framework::aptos_coin::AptosCoin; //Specific import for Aptos native token (APT). The base currency of the Aptos network
 
     #[test_only]
     use std::debug;
