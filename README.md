@@ -61,8 +61,8 @@ PizzaCoin is launching and wants to share pizza slices with their community usin
 
 ## Quickstart
 ```bash
-git clone https://github.com/EmanHerawy/aptos-first-flight
-cd aptos-first-flight/pizza_drop
+git clone https://github.com/CodeHawks-Contests/2025-08-aptos-pizza-drop.git
+cd 2025-08-aptos-pizza-drop
 aptos move compile --dev
 ```
 
