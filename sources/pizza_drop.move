@@ -29,11 +29,11 @@ module pizza_drop::airdrop {
 
 //This struct is typically stored under the module's account (usually the account that deployed the contract) and provides the module with special privileges: 
 
- Module Administration: Allows the module to perform privileged operations
+// Module Administration: Allows the module to perform privileged operations
 
-Resource Management: Create resources on behalf of the module account
+// Resource Management: Create resources on behalf of the module account
 
-Fee Collection: Withdraw funds from the module account
+// Fee Collection: Withdraw funds from the module account
 
 Upgrade Capability: Manage module upgrades
     struct ModuleData has key { //This means the struct is a resource that can be stored under an account in global storage.
@@ -48,24 +48,25 @@ Upgrade Capability: Manage module upgrades
     }
 
     /// Initialize the module
-    fun init_module(deployer: &signer) {
-        let seed = b"pizza_drop";
-        let (resource_signer, resource_signer_cap) = account::create_resource_account(deployer, seed);
+    fun init_module(deployer: &signer) { // iT is called automatically when the module is deployed. deployer is the account that deployed the contract
+        let seed = b"pizza_drop"; //Creates a resource account controlled by the module. seed ensures deterministic address generation
+        let (resource_signer, resource_signer_cap) = account::create_resource_account(deployer, seed); // resource_signer can sign transactions for this account. resource_signer_cap is the capability to generate signers later
         
-        move_to(deployer, ModuleData {
+        move_to(deployer, ModuleData { //Stores the SignerCapability under the deployer's account. This allows the module to generate signers for the resource account later
             signer_cap: resource_signer_cap,
         });
 
-        let state = State {
-            users_claimed_amount: table::new(),
-            claimed_users: table::new(),
-            owner: signer::address_of(deployer),
-            balance: 0,
+        let state = State { //Creates the initial State struct with empty tables. Sets the deployer as the owner. Stores the state under the resource account (not the deployer's account)
+            users_claimed_amount: table::new(), //Creates a new empty Table<address, u64>. Maps user addresses → amount they've claimed. 0x123 → 500 (user 0x123 claimed 500 tokens)
+            claimed_users: table::new(), //Creates a new empty Table<address, bool>. Quick lookup to check if a user has claimed anything
+            owner: signer::address_of(deployer), //Stores the deployer's address as the contract owner. Administrative privileges for: Withdrawing funds, Changing parameters, Upgrading contract, Emergency functions
+            balance: 0, //Initializes the contract's balance to zero. Tracks total tokens/funds held by the contract.  Will be incremented when users deposit funds
         };
-        move_to(&resource_signer, state);
+        move_to(&resource_signer, state); // A built-in function that stores a resource under an account. &resource_signer: The account where the resource will be stored (your resource account). The State struct containing all your contract data
+
 
         // Register the resource account to receive APT
-        coin::register<AptosCoin>(&resource_signer);
+        coin::register<AptosCoin>(&resource_signer); //coin::register: A function from the Aptos framework. <AptosCoin>: Specifies the coin type (APT token). The account being registered.
     }
 
     public entry fun register_pizza_lover(owner: &signer, user: address) acquires ModuleData, State {
