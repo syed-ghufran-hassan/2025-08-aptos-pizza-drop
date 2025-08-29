@@ -69,11 +69,11 @@ Upgrade Capability: Manage module upgrades
         coin::register<AptosCoin>(&resource_signer); //coin::register: A function from the Aptos framework. <AptosCoin>: Specifies the coin type (APT token). The account being registered.
     }
 
-    public entry fun register_pizza_lover(owner: &signer, user: address) acquires ModuleData, State {
-        let state = borrow_global_mut<State>(get_resource_address());
-        assert!(signer::address_of(owner) == state.owner, E_NOT_OWNER);
-        get_random_slice(user);
-        event::emit(PizzaLoverRegistered {
+    public entry fun register_pizza_lover(owner: &signer, user: address) acquires ModuleData, State { //This function allows the transaction signer (owner) to register a given user address as a pizza lover. To do this, it will need to read from and write to two important pieces of on-chain storage (ModuleData and State).
+        let state = borrow_global_mut<State>(get_resource_address()); //It fetches a mutable reference to a State resource stored at a specific address calculated by get_resource_address().
+        assert!(signer::address_of(owner) == state.owner, E_NOT_OWNER); //It ensures the caller (owner) is authorized by verifying their address matches the owner field stored in the State resource, aborting with an error (E_NOT_OWNER) if not.
+        get_random_slice(user); //likely calls a function that performs an action for the user, such as minting them a "random slice" of pizza as a reward or token for registering.
+        event::emit(PizzaLoverRegistered { //emits an on-chain event to log that the registration was successful, broadcasting the user's address for external applications to detect.
             user: user,
         });
     }
