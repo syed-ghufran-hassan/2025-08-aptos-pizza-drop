@@ -138,16 +138,16 @@ Upgrade Capability: Manage module upgrades
     }
 
     #[view]
-    fun get_resource_address(): address acquires ModuleData {
-        let module_data = borrow_global<ModuleData>(@pizza_drop);
-        let resource_signer = account::create_signer_with_capability(&module_data.signer_cap);
-        signer::address_of(&resource_signer)
+    fun get_resource_address(): address acquires ModuleData { // This declares a private function that returns an address and needs to read from the ModuleData resource.
+        let module_data = borrow_global<ModuleData>(@pizza_drop); // This fetches a read-only reference to the ModuleData resource stored at the module's account address (@pizza_drop).
+        let resource_signer = account::create_signer_with_capability(&module_data.signer_cap); // This line uses the signer capability (signer_cap) stored in the ModuleData to programmatically create a signer for the resource account that this module controls.
+        signer::address_of(&resource_signer) // This extracts and returns the blockchain address of the resource account from the created signer object.
     }
 
     #[view]
-    public fun is_registered(user: address): bool acquires ModuleData, State {
-        let state = borrow_global<State>(get_resource_address());
-        table::contains(&state.users_claimed_amount, user)
+    public fun is_registered(user: address): bool acquires ModuleData, State { // This declares a public function (not an entry point) that takes a user's address and returns a boolean (true/false), and it needs to read from the ModuleData and State resources.
+        let state = borrow_global<State>(get_resource_address()); // This fetches a read-only reference to the State resource stored at the module's resource account address.
+        table::contains(&state.users_claimed_amount, user); //This checks if the provided user's address exists as a key in the users_claimed_amount table within the state, returning true if found (meaning they are registered) and false if not.
     }
 
     #[view]
