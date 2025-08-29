@@ -78,62 +78,63 @@ Upgrade Capability: Manage module upgrades
         });
     }
 
-    public entry fun fund_pizza_drop(owner: &signer, amount: u64) acquires ModuleData, State {
-        let state = borrow_global_mut<State>(get_resource_address());
-        assert!(signer::address_of(owner) == state.owner, E_NOT_OWNER);
+    public entry fun fund_pizza_drop(owner: &signer, amount: u64) acquires ModuleData, State { declares a public, entry function named fund_pizza_drop that takes the transaction signer and an amount of coins, and it will access the ModuleData and State global resources
+        let state = borrow_global_mut<State>(get_resource_address()); //  fetches a mutable reference to the State resource stored at the module's resource account address, allowing the function to read and update its data.
 
-        let resource_addr = get_resource_address();
+        assert!(signer::address_of(owner) == state.owner, E_NOT_OWNER); //checks that the account calling this function is the authorized owner of the contract, aborting the transaction with an E_NOT_OWNER error if they are not.
+        let resource_addr = get_resource_address(); //calculates and stores the address of the module's resource account, which is where the funds will be sent.
         
         // Transfer APT from owner to the resource account
-        coin::transfer<AptosCoin>(owner, resource_addr, amount);
-        state.balance = state.balance + amount;
+        coin::transfer<AptosCoin>(owner, resource_addr, amount); //This transfers the specified amount of AptosCoin from the caller's account (owner) to the module's resource account (resource_addr).
+        state.balance = state.balance + amount; //This updates the balance field in the State resource to reflect the new deposit, adding the transferred amount to the current balance.
     }
 
-    public entry fun claim_pizza_slice(user: &signer) acquires ModuleData, State {
-        let user_addr = signer::address_of(user);
-        let state = borrow_global_mut<State>(get_resource_address());
+    public entry fun claim_pizza_slice(user: &signer) acquires ModuleData, State { //This declares a public function that a user can call to claim their pizza slice reward, which requires access to the ModuleData and State resources.
+        let user_addr = signer::address_of(user);  // This gets the blockchain address of the user who is calling the function.
+        let state = borrow_global_mut<State>(get_resource_address()); // This fetches a mutable reference to the State resource stored at the module's resource account address.
         
-        assert!(table::contains(&state.users_claimed_amount, user_addr), E_NOT_REGISTERED);
-        assert!(!table::contains(&state.claimed_users, user_addr), E_ALREADY_CLAIMED);
+        assert!(table::contains(&state.users_claimed_amount, user_addr), E_NOT_REGISTERED); // This checks that the user's address exists in a lookup table (users_claimed_amount), ensuring they are registered and have an allocated amount to claim, or it fails with an E_NOT_REGISTERED error.
+        assert!(!table::contains(&state.claimed_users, user_addr), E_ALREADY_CLAIMED); // This checks that the user's address is NOT in a separate lookup table (claimed_users), ensuring they haven't already claimed their reward, or it fails with an E_ALREADY_CLAIMED error.
         
-        let amount = *table::borrow(&state.users_claimed_amount, user_addr);
+        let amount = *table::borrow(&state.users_claimed_amount, user_addr); // This retrieves the specific reward amount the user is eligible to claim from the users_claimed_amount table.
         
         // Check if contract has sufficient balance
-        assert!(state.balance >= amount, E_INSUFFICIENT_FUND);
+        assert!(state.balance >= amount, E_INSUFFICIENT_FUND); // This verifies that the smart contract's treasury (its balance) has enough funds to pay the user's reward, or it fails with an E_INSUFFICIENT_FUND error.
         
         // Register user to receive APT if not already registered
-        if (!coin::is_account_registered<AptosCoin>(user_addr)) {
-            coin::register<AptosCoin>(user);
+        if (!coin::is_account_registered<AptosCoin>(user_addr)) { // This checks if the user's account is set up to receive the AptosCoin currency.
+
+            coin::register<AptosCoin>(user); // If the user's account is not set up (from the previous line), this line prepares their account to receive AptosCoin.
         };
         
-        transfer_from_contract(user_addr, amount);
+        transfer_from_contract(user_addr, amount); //This calls a helper function (not shown here) that handles the logic of transferring the specified amount of coins from the contract's treasury to the user's address.
         
         // Update balance
-        state.balance = state.balance - amount;
+        state.balance = state.balance - amount; // This updates the contract's treasury balance by subtracting the amount that was just sent to the user.
         
-        table::add(&mut state.claimed_users, user_addr, true);
+        table::add(&mut state.claimed_users, user_addr, true); // This adds the user's address to the claimed_users table and marks it as true, preventing them from claiming the reward again in the future.
         
-        event::emit(PizzaClaimed {
+        event::emit(PizzaClaimed { // This emits an on-chain event to log that a claim was successful, recording the user's address and the amount they received.
             user: user_addr,
             amount: amount,
         });
     }
 
-    fun transfer_from_contract(to: address, amount: u64) acquires ModuleData {
-        let module_data = borrow_global<ModuleData>(@pizza_drop);
-        let resource_signer = account::create_signer_with_capability(&module_data.signer_cap);
+    fun transfer_from_contract(to: address, amount: u64) acquires ModuleData { //This declares a private helper function (not public entry) that transfers coins from the contract's treasury to an address, and it needs to access the ModuleData resource.
+        let module_data = borrow_global<ModuleData>(@pizza_drop); // This fetches a read-only reference to the ModuleData resource stored at the module's account address (@pizza_drop).
+        let resource_signer = account::create_signer_with_capability(&module_data.signer_cap); // This is the most crucial line: it uses a special permission (a signer_capability) stored in ModuleData to create a signer for the resource account, allowing the contract to sign transactions on behalf of that account.
         
         // Transfer APT from resource account to user
-        coin::transfer<AptosCoin>(&resource_signer, to, amount);
+        coin::transfer<AptosCoin>(&resource_signer, to, amount); // This performs the transfer: it moves the specified amount of AptosCoin from the resource account (controlled by resource_signer) to the recipient's address (to).
     }
     
     #[randomness]
-    entry fun get_random_slice(user_addr: address) acquires ModuleData, State {
-        let state = borrow_global_mut<State>(get_resource_address());
-        let time = timestamp::now_microseconds();
-        let random_val = time % 401;
-        let random_amount = 100 + random_val;  // 100-500 APT (in Octas: 10^8 smallest unit)
-        table::add(&mut state.users_claimed_amount, user_addr, random_amount);
+    entry fun get_random_slice(user_addr: address) acquires ModuleData, State { // This declares an entry function that determines a random reward amount for a user, requiring access to the ModuleData and State resources.
+        let state = borrow_global_mut<State>(get_resource_address()); // This fetches a mutable reference to the State resource so the function can update its data.
+        let time = timestamp::now_microseconds(); // This gets the current blockchain timestamp in microseconds and uses it as a simple, but predictable, source of "randomness".
+        let random_val = time % 401; // This calculates a pseudo-random number between 0 and 400 by taking the remainder of the timestamp divided by 401.
+        let random_amount = 100 + random_val;  // 100-500 APT (in Octas: 10^8 smallest unit) // This sets the final reward amount to a value between 100 and 500 by adding the base (100) to the random value (0-400), and the comment clarifies the unit is the smallest fraction of APT (10^-8 APT).
+        table::add(&mut state.users_claimed_amount, user_addr, random_amount); // This stores the calculated random amount in a table within the State resource, mapping it to the user's address for them to claim later.
     }
 
     #[view]
