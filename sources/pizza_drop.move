@@ -151,18 +151,18 @@ Upgrade Capability: Manage module upgrades
     }
 
     #[view]
-    public fun has_claimed_slice(user: address): bool acquires ModuleData, State {
-        let state = borrow_global<State>(get_resource_address());
-        if (!table::contains(&state.claimed_users, user)) {
-            return false
+    public fun has_claimed_slice(user: address): bool acquires ModuleData, State { // checks if a user has claimed their pizza slice, returning a boolean and requiring read access to the ModuleData and State resources.
+        let state = borrow_global<State>(get_resource_address()); // fetches a read-only reference to the State resource from the module's resource account.
+        if (!table::contains(&state.claimed_users, user)) {  //  checks if the user's address is NOT present in the claimed_users table.
+            return false // If the user is not in the table (from the previous check), the function immediately returns false, meaning they have not claimed their slice.
         };
-        table::contains(&state.claimed_users, user)
+        table::contains(&state.claimed_users, user) // If the function reaches this line, it means the user is in the table, so it returns true to confirm they have already claimed their slice.
     }
 
     #[view]
-    public fun get_pizza_pool_balance(): u64 acquires ModuleData, State {
-        let state = borrow_global<State>(get_resource_address());
-        state.balance
+    public fun get_pizza_pool_balance(): u64 acquires ModuleData, State { //  returns a 64-bit unsigned integer (u64) and needs read access to the ModuleData and State resources to get the balance.
+        let state = borrow_global<State>(get_resource_address()); / /fetches a read-only reference to the State resource stored at the module's resource account address.
+        state.balance // This accesses and returns the value of the balance field from the State resource, which represents the current amount of funds in the pizza pool.
     }
 
     #[view]
