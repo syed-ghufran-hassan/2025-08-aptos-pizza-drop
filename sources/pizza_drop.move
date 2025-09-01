@@ -166,13 +166,13 @@ Upgrade Capability: Manage module upgrades
     }
 
     #[view]
-    public fun get_claimed_amount(user: address): u64 acquires ModuleData, State {
-        let state = borrow_global<State>(get_resource_address());
-        if (!table::contains(&state.users_claimed_amount, user)) {
+    public fun get_claimed_amount(user: address): u64 acquires ModuleData, State { // This declares a public function that takes a user's address and returns a u64 value, requiring read access to the ModuleData and State resources.
+        let state = borrow_global<State>(get_resource_address()); //  fetches a read-only reference to the State resource stored at the module's resource account address.
+        if (!table::contains(&state.users_claimed_amount, user)) { // This checks if the user's address is NOT found as a key in the users_claimed_amount table.
             return 0
         };
-        let amount = table::borrow(&state.users_claimed_amount, user);
-        *amount
+        let amount = table::borrow(&state.users_claimed_amount, user); // If the function reaches this line, the user exists in the table. This line borrows a read-only reference to the value (the claim amount) associated with the user's address.
+        *amount // This dereferences the borrowed reference, returning the actual u64 value of the claim amount stored in the table.
     }
 
     // Get the actual APT balance of the resource account
