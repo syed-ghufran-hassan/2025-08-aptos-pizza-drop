@@ -177,9 +177,9 @@ Upgrade Capability: Manage module upgrades
 
     // Get the actual APT balance of the resource account
     #[view]
-    public fun get_actual_apt_balance(): u64 acquires ModuleData {
-        let resource_addr = get_resource_address();
-        coin::balance<AptosCoin>(resource_addr)
+    public fun get_actual_apt_balance(): u64 acquires ModuleData { // declares a public function that returns a number (u64) and needs to read the ModuleData resource to find the resource account's address.
+        let resource_addr = get_resource_address(); // calls a helper function to calculate and store the address of the resource account that holds the contract's funds.
+        coin::balance<AptosCoin>(resource_addr) //  it asks the Aptos blockchain for the current balance of AptosCoin stored at the resource account's address and returns that value.
     }
 
     // WORKING TEST WITH APTOS COIN
